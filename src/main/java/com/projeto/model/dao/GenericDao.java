@@ -3,7 +3,11 @@ package com.projeto.model.dao;
 import java.io.Serializable;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class GenericDao<T, ID extends Serializable>{
 	
@@ -31,6 +35,18 @@ public abstract class GenericDao<T, ID extends Serializable>{
 	 public T findById(ID id) {
 		 return this.getEntityManager().find(getClassePersistencia(), id);
 	 }
+	 
+	 @SuppressWarnings("unchecked")
+	 public List<T> findAll(Class<T> classe){
+		 List<T> lista = new ArrayList<>();
+		 Query query = this.getEntityManager().createQuery("SELECT o FROM "+classe.getSimpleName()+" o");
+		 
+		 lista = query.getResultList();
+		 
+		 return lista;
+		 
+	 }
+	 
 
 	public EntityManager getEntityManager() {
 		return entityManager;

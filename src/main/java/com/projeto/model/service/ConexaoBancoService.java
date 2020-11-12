@@ -16,7 +16,6 @@ public abstract class ConexaoBancoService {
 		this.entityManager = ConexaoBancoDados.getConexaoBancoDados().getEntityManager();
 	}
 	
-	
 	public void close() {
 		if(this.getEntityManager().isOpen()) {
 			this.getEntityManager().close();
