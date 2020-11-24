@@ -119,8 +119,6 @@ public class UsuarioService extends ConexaoBancoService{
 	}
 	
 
-	
-
 	public UsuarioDao getUsuarioDao() {
 		return usuarioDao;
 	}
