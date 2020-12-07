@@ -22,12 +22,14 @@ public class UsuarioService extends ConexaoBancoService{
 		
 		EntityTransaction trx = this.getTransaction();
 		
-		if(validarDigitacao(usuario)== VariaveisProjeto.DIGITACAO_OK) {
+		toReturn = validarDigitacao(usuario);
+		if(toReturn == VariaveisProjeto.DIGITACAO_OK) {
 		
 			try {
 				trx.begin();
 				this.getUsuarioDao().save(usuario);
 				trx.commit();
+				toReturn = VariaveisProjeto.INCLUSAO_REALIZADA;
 				
 			}catch(Exception ex) {
 				ex.printStackTrace();
@@ -38,10 +40,7 @@ public class UsuarioService extends ConexaoBancoService{
 			}finally {
 				this.close();
 			}
-		} else {
-			toReturn = VariaveisProjeto.CAMPO_VAZIO;
-		}
-		
+		} 
 		return toReturn;
 	}
 	
@@ -52,12 +51,14 @@ public class UsuarioService extends ConexaoBancoService{
 		
 		EntityTransaction trx = this.getTransaction();
 		
-		if(validarDigitacao(usuario)== VariaveisProjeto.DIGITACAO_OK) {
+		toReturn = validarDigitacao(usuario);
+		if(toReturn == VariaveisProjeto.DIGITACAO_OK) {
 		
 			try {
 				trx.begin();
 				this.getUsuarioDao().update(usuario);
 				trx.commit();
+				toReturn = VariaveisProjeto.ALTERECAO_REALIZADA;
 				
 			}catch(Exception ex) {
 				ex.printStackTrace();
@@ -68,10 +69,7 @@ public class UsuarioService extends ConexaoBancoService{
 			}finally {
 				this.close();
 			}
-		} else {
-			toReturn = VariaveisProjeto.CAMPO_VAZIO;
 		}
-		
 		return toReturn;
 	}
 	
@@ -87,13 +85,14 @@ public class UsuarioService extends ConexaoBancoService{
 				Usuario usuarioEncontrado = this.getUsuarioDao().findById(usuario.getId());
 				this.getUsuarioDao().remove(usuarioEncontrado);
 				trx.commit();
+				toReturn = VariaveisProjeto.EXCLUSAO_REALIZADA;
 				
 			}catch(Exception ex) {
 				ex.printStackTrace();
 				if(trx.isActive()) {
 					trx.rollback();
 				}
-				toReturn = VariaveisProjeto.ERRO_ALTERACAO;
+				toReturn = VariaveisProjeto.ERRO_EXCLUSAO;
 			}finally {
 				this.close();
 			}
@@ -112,7 +111,7 @@ public class UsuarioService extends ConexaoBancoService{
 	
 	public Integer validarDigitacao(Usuario usuario) {
 		if(VariaveisProjeto.digitacaoCampo(usuario.getUsername())) {
-			return VariaveisProjeto.CAMPO_VAZIO;
+			return VariaveisProjeto.NOME_CAMPO_VAZIO;
 		}
 		
 		return VariaveisProjeto.DIGITACAO_OK;
