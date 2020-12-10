@@ -15,6 +15,8 @@ public class VariaveisProjeto {
 	public static final Integer EXCLUSAO_REALIZADA = 3;
 	
 	public static final Integer DIGITACAO_OK = 100;
+	
+	
 	public static final Integer NOME_CAMPO_VAZIO = 200;
 	
 	public static final String LIMPA_CAMPO = "";
