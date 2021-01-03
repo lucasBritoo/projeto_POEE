@@ -18,7 +18,10 @@ public class UsuarioDao extends GenericDao<Usuario, Integer>{
 		
 		List<Usuario> listaUsuario = new ArrayList<Usuario>();
 		
-		Query query = this.getEntityManager().createQuery("SELECT u FROM Usuario u WHERE u.ativo =: ativo");
+		Query query = this.getEntityManager().createQuery("SELECT u FROM Usuario u "
+														+ "LEFT JOIN FETCH u.departamento "
+														+ "LEFT JOIN FETCH u.roles "
+														+ "WHERE u.ativo =: ativo");
 		query.setParameter("ativo", true);
 		query.setFirstResult(numeroPagina);
 		query.setMaxResults(defaultPagina);

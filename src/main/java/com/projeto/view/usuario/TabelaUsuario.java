@@ -3,10 +3,13 @@ package com.projeto.view.usuario;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableRowSorter;
+import javax.swing.RowFilter;
 
+import com.projeto.estrutura.util.VariaveisProjeto;
 import com.projeto.model.models.Usuario;
 import com.projeto.model.service.UsuarioService;
 
@@ -29,9 +32,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
-public class TabelaUsuario extends JFrame {
+public class TabelaUsuario extends JInternalFrame {
 
 	private static final long serialVersionUID = -1898454122848949025L;
 
@@ -91,6 +97,7 @@ public class TabelaUsuario extends JFrame {
 	 */
 	public TabelaUsuario() {
 		initComponents();
+		iniciaPaginacao();
 	}
 	private void initComponents() {
 		setTitle("TABELA USUARIO");
@@ -104,15 +111,36 @@ public class TabelaUsuario extends JFrame {
 		scrollPane = new JScrollPane();
 		
 		btnIncluir = new JButton("INCLUIR");
+		btnIncluir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				incluirUsuario();
+				iniciaPaginacao();
+			}
+
+			
+		});
 		btnIncluir.setIcon(new ImageIcon(TabelaUsuario.class.getResource("/com/projeto/estrutura/imagens/book_add.png")));
 		
 		btnAlterar = new JButton("ALTERAR");
+		btnAlterar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				alterarUsuario();
+				iniciaPaginacao();
+			}
+
+			
+		});
 		btnAlterar.setIcon(new ImageIcon(TabelaUsuario.class.getResource("/com/projeto/estrutura/imagens/book_edit.png")));
 		
 		btnExcluir = new JButton("EXCLUIR");
 		btnExcluir.setIcon(new ImageIcon(TabelaUsuario.class.getResource("/com/projeto/estrutura/imagens/book_delete.png")));
 		
 		btnSair = new JButton("SAIR");
+		btnSair.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 		btnSair.setIcon(new ImageIcon(TabelaUsuario.class.getResource("/com/projeto/estrutura/imagens/book_go.png")));
 		
 		panel = new JPanel();
@@ -120,19 +148,36 @@ public class TabelaUsuario extends JFrame {
 		lblNewLabel = new JLabel("P\u00E1gina:");
 		
 		comboBox = new JComboBox<String>();
+		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"5", "10", "15", "20"}));
+		comboBox.setSelectedIndex(0);
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				iniciaPaginacao();
 			}
 		});
-		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"5", "10", "15", "20"}));
+		
 		
 		lblNewLabel_1 = new JLabel("Pesquisar");
 		
 		txtPesquisar = new JTextField();
+		txtPesquisar.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				String filtro = txtPesquisar.getText();
+				
+				filtraNomeUsuario(filtro);
+			}
+
+			
+		});
 		txtPesquisar.setColumns(10);
 		
 		btnPesquisar = new JButton("Pesquisar");
+		btnPesquisar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
 		btnPesquisar.setToolTipText("Pesquisar usu\u00E1rio cadastrado");
 		btnPesquisar.setIcon(new ImageIcon(TabelaUsuario.class.getResource("/com/projeto/estrutura/imagens/search.png")));
 		
@@ -353,9 +398,9 @@ public class TabelaUsuario extends JFrame {
 		
 		tabelaUsuario.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		
-		tabelaUsuario.getColumn(CODIGO).setWidth(11);
-		tabelaUsuario.getColumn(NOME).setWidth(100);
-		tabelaUsuario.getColumn(EMAIL).setWidth(100);
+		tabelaUsuario.getColumnModel().getColumn(CODIGO).setWidth(11);
+		tabelaUsuario.getColumnModel().getColumn(NOME).setWidth(100);
+		tabelaUsuario.getColumnModel().getColumn(EMAIL).setWidth(100);
 		
 		
 		lblInicio.setText(String.valueOf(numeroPagina));
@@ -363,7 +408,37 @@ public class TabelaUsuario extends JFrame {
 		
 	}
 	
+	private void filtraNomeUsuario(String filtro) {
+		RowFilter<TabelaUsuarioModel, Object> rowFilter = null;
+		
+		try {
+			rowFilter = RowFilter.regexFilter(filtro);
+		}catch(PatternSyntaxException e) {
+			return;
+		}
+		sortTabelaUsuario.setRowFilter(rowFilter);
+		
+	}
 	
+	private void incluirUsuario() {
+		CadastroUsuario usuario = new CadastroUsuario(new JFrame(), true, tabelaUsuario, tabelaUsuarioModel, 0, VariaveisProjeto.INCLUSAO);
+		usuario.setLocationRelativeTo(null);
+		usuario.setResizable(false);
+		usuario.setVisible(true);
+	}
+	
+	private void alterarUsuario() {
+		if(tabelaUsuario.getSelectedRow() != -1 && tabelaUsuario.getSelectedRow() < tabelaUsuarioModel.getRowCount()) {
+			int linha = tabelaUsuario.getSelectedRow();
+			
+			CadastroUsuario usuario = new CadastroUsuario(new JFrame(), true, tabelaUsuario, tabelaUsuarioModel, linha, VariaveisProjeto.ALTERACAO);
+			usuario.setLocationRelativeTo(null);
+			usuario.setResizable(false);
+			usuario.setVisible(true);
+			
+			
+		}
+	}
 	
 	private List<Usuario> carregaListaUsuario(Integer numeroPagina, Integer defaultPagina) {
 		
@@ -371,7 +446,7 @@ public class TabelaUsuario extends JFrame {
 		List<Usuario> listaUsuario = new ArrayList<Usuario>();
 		
 		listaUsuario = usuarioService.listUsuarioPaginacao((defaultPagina * (numeroPagina - 1)), defaultPagina);
-		return null;
+		return listaUsuario;
 	}
 
 	private Integer buscaTotalRegistroUsuario() {

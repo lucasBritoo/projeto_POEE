@@ -18,7 +18,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JRadioButton;
+import javax.swing.JTable;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JPasswordField;
@@ -28,7 +31,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
 
-public class UsuarioGUI extends JFrame {
+public class CadastroUsuario extends JDialog {
 
 	/**
 	 * 
@@ -57,9 +60,17 @@ public class UsuarioGUI extends JFrame {
 	
 	private boolean status = true;
 	
+	private JTable tabelaUsuario;
+	private TabelaUsuarioModel tabelaUsuarioModel;
+	
+	private int linha =0;
+	private int acao =0;
+	private JLabel lblDepartamento;
+	private JTextField txtDepartamento;
+	private JButton btnDepartamento;
+	
 	/**
-	 * Launch the application.
-	 */
+	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -73,12 +84,32 @@ public class UsuarioGUI extends JFrame {
 		});
 	}
 
-	/**
-	 * Create the frame.
 	 */
-	public UsuarioGUI() {
+	
+	public CadastroUsuario(JFrame frame, boolean modal, JTable tabelaUsuario, TabelaUsuarioModel tabelaUsuarioModel, int linha, int acao) {
+		
+		
+		super(frame, modal);
+		
+		this.tabelaUsuario = tabelaUsuario;
+		this.tabelaUsuarioModel = tabelaUsuarioModel;
+		this.linha = linha;
+		this.acao = acao;
+		
+		initComponents();
+	
+
+		limpaTextoCampo();
+		desabilitaCheckCampos();
+		
+		configuraAcaoUsuario();
+	}
+	
+	
+
+	private void initComponents() {
 		setTitle("Cadastro de Uusarios");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 620, 426);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -131,9 +162,9 @@ public class UsuarioGUI extends JFrame {
 		rdbtnAdmin = new JRadioButton("Admin");
 		
 		btnIncluir = new JButton("Incluir");
-		btnIncluir.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/application_add.png")));
+		btnIncluir.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/application_add.png")));
 		btnAlterar = new JButton("Alterar");
-		btnAlterar.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/application_edit.png")));
+		btnAlterar.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/application_edit.png")));
 		btnAlterar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				alterarUsuario();
@@ -141,7 +172,7 @@ public class UsuarioGUI extends JFrame {
 
 		});
 		btnExcluir = new JButton("Excluir");
-		btnExcluir.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/application_delete.png")));
+		btnExcluir.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/application_delete.png")));
 		btnExcluir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				excluirUsuario();
@@ -150,7 +181,7 @@ public class UsuarioGUI extends JFrame {
 			
 		});
 		btnSair = new JButton("Sair");
-		btnSair.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/sair.png")));
+		btnSair.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/sair.png")));
 		
 		btnSair.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -206,13 +237,25 @@ public class UsuarioGUI extends JFrame {
 		textCodigo.setColumns(10);
 		
 		checkNome = new JLabel("");
-		checkNome.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
+		checkNome.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
 		
 		checkEmail = new JLabel("");
-		checkEmail.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
+		checkEmail.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
 		
 		checkSenha = new JLabel("");
-		checkSenha.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
+		checkSenha.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
+		
+		lblDepartamento = new JLabel("Departamento:");
+		
+		txtDepartamento = new JTextField();
+		txtDepartamento.setEditable(false);
+		txtDepartamento.setText("");
+		txtDepartamento.setColumns(10);
+		
+		btnDepartamento = new JButton("Departamento");
+		btnDepartamento.setMnemonic(KeyEvent.VK_D);
+		btnDepartamento.setToolTipText("Buscar Departamento");
+		btnDepartamento.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/search.png")));
 		
 		
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
@@ -222,13 +265,7 @@ public class UsuarioGUI extends JFrame {
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(84)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addComponent(lblSenha, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(passwordFieldSenha, GroupLayout.PREFERRED_SIZE, 369, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.UNRELATED)
-									.addComponent(checkSenha, 0, 0, Short.MAX_VALUE))
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
 										.addGroup(gl_contentPane.createSequentialGroup()
@@ -244,12 +281,13 @@ public class UsuarioGUI extends JFrame {
 										.addComponent(checkEmail, 0, 0, Short.MAX_VALUE)
 										.addGroup(gl_contentPane.createSequentialGroup()
 											.addComponent(checkNome, GroupLayout.PREFERRED_SIZE, 28, Short.MAX_VALUE)
-											.addGap(34))))))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(112)
-							.addComponent(rdbtnAtivo, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE)
-							.addGap(46)
-							.addComponent(rdbtnAdmin, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE))
+											.addGap(34))))
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addComponent(lblSenha, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(passwordFieldSenha, GroupLayout.PREFERRED_SIZE, 369, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addComponent(checkSenha, 0, 0, Short.MAX_VALUE))))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(47)
 							.addComponent(btnIncluir)
@@ -260,10 +298,24 @@ public class UsuarioGUI extends JFrame {
 							.addGap(31)
 							.addComponent(btnSair))
 						.addGroup(gl_contentPane.createSequentialGroup()
+							.addGap(111)
+							.addComponent(rdbtnAtivo, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE)
+							.addGap(46)
+							.addComponent(rdbtnAdmin, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE))
+						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(74)
-							.addComponent(lblCodigo, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(textCodigo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addComponent(lblDepartamento)
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addComponent(txtDepartamento, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(btnDepartamento))
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addComponent(lblCodigo, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addComponent(textCodigo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+							.addGap(73)))
 					.addContainerGap(26, Short.MAX_VALUE))
 		);
 		gl_contentPane.setVerticalGroup(
@@ -290,11 +342,16 @@ public class UsuarioGUI extends JFrame {
 						.addComponent(lblSenha)
 						.addComponent(passwordFieldSenha, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(checkSenha, GroupLayout.PREFERRED_SIZE, 19, GroupLayout.PREFERRED_SIZE))
-					.addGap(47)
+					.addGap(18)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+						.addComponent(lblDepartamento)
+						.addComponent(txtDepartamento, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnDepartamento))
+					.addPreferredGap(ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 						.addComponent(rdbtnAtivo)
 						.addComponent(rdbtnAdmin))
-					.addPreferredGap(ComponentPlacement.RELATED, 62, Short.MAX_VALUE)
+					.addGap(18)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 						.addComponent(btnIncluir)
 						.addComponent(btnAlterar)
@@ -303,8 +360,10 @@ public class UsuarioGUI extends JFrame {
 					.addGap(25))
 		);
 		contentPane.setLayout(gl_contentPane);
-		limpaTextoCampo();
-		desabilitaCheckCampos();
+		
+		btnAlterar.setEnabled(false);
+		btnIncluir.setEnabled(false);
+		btnExcluir.setEnabled(false);
 	}
 	
 	private void verificaDigitacaoNome() {
@@ -364,10 +423,10 @@ public class UsuarioGUI extends JFrame {
 	private void mudaStatusCheckNome() {
 		//checkNomeSucesso = new JLabel("");
 		if(status == false){
-			checkNome.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/iconFechar.png")));
+			checkNome.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/iconFechar.png")));
 		}
 		else {
-			checkNome.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
+			checkNome.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
 		}
 		checkNome.setVisible(true);
 		
@@ -377,10 +436,10 @@ public class UsuarioGUI extends JFrame {
 	private void mudaStatusCheckEmail() {
 		//checkNomeSucesso = new JLabel("");
 		if(status == false){
-			checkEmail.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/iconFechar.png")));
+			checkEmail.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/iconFechar.png")));
 		}
 		else {
-			checkEmail.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
+			checkEmail.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
 		}
 		checkEmail.setVisible(true);
 		
@@ -390,10 +449,10 @@ public class UsuarioGUI extends JFrame {
 	private void mudaStatusCheckSenha() {
 		//checkNomeSucesso = new JLabel("");
 		if(status == false){
-			checkSenha.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/iconFechar.png")));
+			checkSenha.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/iconFechar.png")));
 		}
 		else {
-			checkSenha.setIcon(new ImageIcon(UsuarioGUI.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
+			checkSenha.setIcon(new ImageIcon(CadastroUsuario.class.getResource("/com/projeto/estrutura/imagens/ok.png")));
 		}
 		checkSenha.setVisible(true);
 		
@@ -406,7 +465,7 @@ public class UsuarioGUI extends JFrame {
 		Usuario usuario = pegarDadosUsuario();
 		
 		Departamento departamento = new Departamento();
-		departamento.setId(1L);
+		departamento.setId(1);
 		departamento.setNome("Vendas");
 		
 		usuario.setDepartamento(departamento);
@@ -424,12 +483,19 @@ public class UsuarioGUI extends JFrame {
 		}
 		if(toReturn == VariaveisProjeto.INCLUSAO_REALIZADA) {
 			showMensagem( "Inclusao foi realizada com sucesso","OK", JOptionPane.OK_OPTION );
+			
+			
+			tabelaUsuarioModel.fireTableDataChanged();
+			
 			limpaTextoCampo();
 			usuario = new Usuario();
 		}
 		
 	}
 
+
+	
+	
 	private void showMensagem(String mensagem, String status, int option) {
 		JOptionPane.showMessageDialog(null, mensagem, status, option );
 	}
@@ -437,29 +503,47 @@ public class UsuarioGUI extends JFrame {
 	private void buscarUsuario() {
 		Usuario usuario = new Usuario();
 		
-		if(VariaveisProjeto.digitacaoCampo(textCodigo.getText())) {
+		/*if(VariaveisProjeto.digitacaoCampo(textCodigo.getText())) {
 			textCodigo.requestFocus();
 			return ; 
 		}
 		Integer id = Integer.valueOf(textCodigo.getText());
-		UsuarioService usuarioService = new UsuarioService();
+		*/
 		
-		usuario = usuarioService.findById(id);
+		usuario = tabelaUsuarioModel.getUsuario(this.linha);
 		
+		//UsuarioService usuarioService = new UsuarioService();
+		
+		//usuario = usuarioService.findById(usuario.getId());
+		
+		textCodigo.setText(String.valueOf(usuario.getId()));
 		txtUsername.setText(usuario.getUsername());
 		txtEmail.setText(usuario.getEmail());
 		passwordFieldSenha.setText(usuario.getPassword());
+		
+		txtDepartamento.setText(usuario.getDepartamento().getNome());
+		
+		
 		
 		if(usuario.isAdmin())
 			rdbtnAdmin.setSelected(true);
 		
 		if(usuario.isAtivo())
 			rdbtnAtivo.setSelected(true);
+			
+			
 	}
 	
 	protected void alterarUsuario() {
 		Integer toReturn =0;
 		Usuario usuario = pegarDadosUsuario();
+		
+		Departamento departamento = new Departamento();
+		departamento.setId(1);
+		//departamento.setNome("Vendas");
+		
+		usuario.setDepartamento(departamento);
+		
 		
 		UsuarioService usuarioService = new UsuarioService();
 		
@@ -474,8 +558,14 @@ public class UsuarioGUI extends JFrame {
 		}
 		if(toReturn == VariaveisProjeto.ALTERECAO_REALIZADA) {
 			showMensagem( "Alteração foi realizada com sucesso","OK", JOptionPane.OK_OPTION );
+			
+			
+			tabelaUsuarioModel.fireTableDataChanged();
+			
+			
 			limpaTextoCampo();
 			usuario = new Usuario();
+			
 		}
 	}
 	
@@ -502,12 +592,15 @@ public class UsuarioGUI extends JFrame {
 	public Usuario pegarDadosUsuario() {
 		Usuario usuario = new Usuario();
 		
-		//if(VariaveisProjeto.digitacaoCampo(textCodigo.getText())) {
-		//	textCodigo.requestFocus();
-		//	return ;
-		//}
+		if(VariaveisProjeto.digitacaoCampo(textCodigo.getText())) {
+			textCodigo.requestFocus();
+		}
 		
-		usuario.setId(VariaveisProjeto.convertToInteger(textCodigo.getText()));
+		if(VariaveisProjeto.digitacaoCampo(textCodigo.getText()) == false) {
+			usuario.setId(Integer.valueOf(textCodigo.getText()));
+		}
+		
+		
 		usuario.setId(Integer.valueOf(textCodigo.getText()));
 		usuario.setUsername(txtUsername.getText());
 		usuario.setEmail(txtEmail.getText());
@@ -526,6 +619,20 @@ public class UsuarioGUI extends JFrame {
 		}
 		
 		return usuario;
+	}
+	
+	private void configuraAcaoUsuario() {
+		if(this.acao == VariaveisProjeto.INCLUSAO) {
+			btnIncluir.setEnabled(true);
+		}
+		if(this.acao == VariaveisProjeto.ALTERACAO) {
+			btnAlterar.setEnabled(true);
+			buscarUsuario();
+		}
+		if(this.acao == VariaveisProjeto.EXCLUSAO) {
+			btnExcluir.setEnabled(true);
+			buscarUsuario();
+		}
 	}
 	
 	private void limpaTextoCampo() {
